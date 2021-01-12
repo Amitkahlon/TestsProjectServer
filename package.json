@@ -1,0 +1,25 @@
+{
+  "name": "testsprojectserver",
+  "version": "1.0.0",
+  "description": "Test Project Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amitkahlon/TestsProjectServer.git"
+  },
+  "author": "amit and roee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Amitkahlon/TestsProjectServer/issues"
+  },
+  "homepage": "https://github.com/Amitkahlon/TestsProjectServer#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "helmet": "^4.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.11"
+  }
+}
