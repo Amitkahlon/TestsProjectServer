@@ -2,9 +2,9 @@ const express = require('express');
 const app = express();
 const helmet = require('helmet')
 const mongoose = require('mongoose')
-const questionsController = require('./controllers/questionsController')
-const testsController = require('./controllers/testsController')
-const organizationController = require('./controllers/organizationController')
+const questionsRoute = require('./routes/questionsRoute')
+const testsRoute = require('./routes/testsRoute')
+const organizationRoute = require('./routes/organizationRoute')
 
 
 app.use(express.json());
@@ -14,8 +14,8 @@ mongoose.connect('mongodb://localhost/testsdb', {useNewUrlParser: true, useUnifi
     .catch(() => console.log('MongoDB Failed to connect.'))
 
     
-app.use('/api/questions', questionsController);
-app.use('/api/tests', testsController);
-app.use('/api/organizations', organizationController);
+app.use('/api/questions', questionsRoute);
+app.use('/api/tests', testsRoute);
+app.use('/api/organizations', organizationRoute);
 
 app.listen(5000, () => console.log('Server is running'));
