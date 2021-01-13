@@ -1,7 +1,6 @@
 const express = require('express');
 const { Question } = require('../models/question');
 const router = express.Router();
-const { questionService } = require("../services/questionsService")
 
 //get questions
 router.get('/', async (req, res) => {
@@ -11,7 +10,6 @@ router.get('/', async (req, res) => {
     } catch (error) {
         res.status(404).send({message: "Problem with db", error})
     }
-
 })
 
 //get questions with id
@@ -89,7 +87,7 @@ router.delete('/:id', async (req, res) => {
             res.status(404).send({ message: "Question not found" });
         }
 
-        res.status(200).send({ deletedQuestion })
+        res.status(200).send(deletedQuestion)
     } catch (error) {
         res.status(404).send({ message: "Value is Invalid", error })
     }
