@@ -31,13 +31,14 @@ router.get('/:id', async (req, res) => {
 //add question
 router.post('/', async (req, res) => {
     const { question } = req.body;
+    console.log(question);
     const newQuestion = new Question({
         questionType: question.questionType,
         title: question.title,
         subTitle: question.subTitle,
         // answers: question.answers,
         answersDisplay: question.answersDisplay,
-        tags: question.tags
+        tags: question.tags.map(tag => tag.text)
     })
     try{
         await newQuestion.save()
