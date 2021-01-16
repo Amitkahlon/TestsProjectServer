@@ -7,11 +7,14 @@ const tests = require('./routes/tests')
 const organizations = require('./routes/organizations')
 const users = require('./routes/users')
 const login = require('./routes/login')
+const cors = require('cors')
 
 const PORT = process.env.PORT || 5000
 
 app.use(express.json());
 app.use(helmet())
+app.use(cors())
+
 mongoose.connect('mongodb://localhost/testsdb', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
     .then(() => console.log('MongoDB Connected.'))
     .catch(() => console.log('MongoDB Failed to connect.'))

@@ -31,7 +31,7 @@ const validateUser = (user) => {
 }
 
 userSchema.methods.generateAuthToken = function () {
-    return jwt.sign({_id: this._id}, process.env.JWT_SECRET);
+    return jwt.sign({_id: this._id, email: this.email}, process.env.JWT_SECRET);
 }
 
 const User = mongoose.model('User', userSchema)
