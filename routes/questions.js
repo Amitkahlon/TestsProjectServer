@@ -1,6 +1,7 @@
 const express = require('express');
-const { Question } = require('../models/question');
+const { Question, validateQuestion } = require('../models/question');
 const router = express.Router();
+const auth = require('../middlewares/auth')
 
 //get questions
 router.get('/', async (req, res) => {
@@ -29,15 +30,17 @@ router.get('/:id', async (req, res) => {
 })
 
 //add question
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const { question } = req.body;
+    const {error} = validateQuestion(question)
+    if(error) return res.send(error.details[0].message).status(400);
     const newQuestion = new Question({
         questionType: question.questionType,
         title: question.title,
         subTitle: question.subTitle,
         // answers: question.answers,
         answersDisplay: question.answersDisplay,
-        tags: question.tags
+        tags: question.tags.map(tag => tag.text)
     })
     try{
         await newQuestion.save()

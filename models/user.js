@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -14,24 +14,24 @@ const userSchema = new mongoose.Schema({
         minlength: 6,
         maxlength: 150
     },
-    organization: {
+    organizations: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Organization',
-        required: true
-    }
+        required: true,
+        ref: 'Organization'
+    }]
 });
 
 const validateUser = (user) => {
     const schema = Joi.object({
-        email: Joi.string().required().email(),
-        password: Joi.string().min(6).max(14).required(),
-        organization: Joi.objectId().required()
+        email: Joi.string().required().email().label('Email'),
+        password: Joi.string().min(6).max(14).required().label('Password'),
+        organizations: Joi.array().items(Joi.objectId()).min(1).required().label('Organization(s)')
     })
     return schema.validate(user)
 }
 
-userSchema.methods.generateAuthToken = function () {
-    return jwt.sign({_id: this._id, organization: this.organization}, process.env.JWT_SECRET);
+userSchema.methods.generateAuthToken = function (org) {
+    return jwt.sign({_id: this._id, email: this.email, organization: org}, process.env.JWT_SECRET);
 }
 
 const User = mongoose.model('User', userSchema)
