@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(helmet())
 app.use(cors(corsOptions))
 
-mongoose.connect('mongodb://localhost/testsdb', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
+mongoose.connect(`mongodb://${process.env.HOST}/${process.env.DATABASE}`, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
     .then(() => console.log('MongoDB Connected.'))
     .catch(() => console.log('MongoDB Failed to connect.'))
 

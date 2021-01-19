@@ -50,9 +50,9 @@ const questionSchema = new mongoose.Schema({
         ref: 'Organization',
         required: true
     },
-    answerDisplay: {
+    answersDisplay: {
         type: String,
-        enum: ['Horizontal', 'Vertical'],
+        enum: ['horizontal', 'vertical'],
         required: true
     },
     tags: [{
@@ -73,7 +73,7 @@ const validateQuestion = (question) => {
         correctAnswers: Joi.array().min(1).required().items(Joi.string()).label('Correct answer(s)'),
         incorrectAnswers: Joi.array().min(1).required().items(Joi.string()).label('Incorrect answer(s)'),
         organization: Joi.objectId().required().label('Organization'),
-        answerDisplay: Joi.string().required().label('Answer Display'),
+        answersDisplay: Joi.string().required().label('Answer Display'),
         tags: Joi.array().items(Joi.string()).min(2).max(15).label('Tags')
     })
     return schema.validate(question);
