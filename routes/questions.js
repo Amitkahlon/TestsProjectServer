@@ -32,6 +32,7 @@ router.get('/:id', async (req, res) => {
 //add question
 router.post('/', auth, async (req, res) => {
     const { question } = req.body;
+    question.organization = req.user.organization;
     const { error } = validateQuestion(question)
     if (error) {
         return res.send({ message: error.details[0].message, error }).status(400);
@@ -43,11 +44,12 @@ router.post('/', auth, async (req, res) => {
         correctAnswers: question.correctAnswers,
         incorrectAnswers: question.incorrectAnswers,
         answersDisplay: question.answersDisplay,
-        tags: question.tags
+        tags: question.tags,
+        organization: question.organization
     })
     try {
         await newQuestion.save()
-        res.send(newQuestion)
+        res.send({question: newQuestion})
     } catch (error) {
         console.log(error);
         res.status(503).send({ message: "Problem occured when added to database", error });
