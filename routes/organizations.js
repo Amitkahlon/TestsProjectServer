@@ -24,7 +24,7 @@ router.get('/:id', auth, async (req, res) => {
     }
 })
 
-router.post('/', auth, async (req, res) => {
+router.post('/', async (req, res) => {
     const {organization} = req.body
     const {error} = validateOrganization(organization)
     if(error) return res.status(400).send(error.details[0].message);
