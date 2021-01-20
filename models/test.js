@@ -45,16 +45,16 @@ const testSchema = new mongoose.Schema({
         required: true
     }
 });
-const emailExpression = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+
 const validateTest = (test) =>{
     const schema = Joi.object({
-        title: Joi.string().min(5).max(200).required(),
-        description: Joi.string().min(0).max(300),
-        authorEmail: Joi.string().pattern(emailExpression).required(),
-        passGrade: Joi.number().min(0).max(100).required(),
-        showCorrectAnswers: Joi.bool().required(),
-        questions: Joi.array().min(1).required(),
-        organization: Joi.objectId().required()
+        title: Joi.string().min(5).max(200).required().label('Title'),
+        description: Joi.string().min(0).max(300).label('Description'),
+        authorEmail: Joi.string().email().required().label('Author email'),
+        passGrade: Joi.number().min(0).max(100).required().label('Pass grade'),
+        showCorrectAnswers: Joi.bool().required().label('Show correct answers'),
+        questions: Joi.array().items(Joi.objectId()).min(1).required().label('Questions'),
+        organization: Joi.objectId().required().label('Organization')
     })
     return schema.validate(test);
 }

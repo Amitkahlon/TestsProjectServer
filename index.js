@@ -7,6 +7,7 @@ const tests = require('./routes/tests')
 const organizations = require('./routes/organizations')
 const users = require('./routes/users')
 const login = require('./routes/login')
+const fields = require('./routes/fields')
 const cors = require('cors')
 
 const PORT = process.env.PORT || 5000
@@ -25,5 +26,6 @@ app.use('/api/tests', tests);
 app.use('/api/organizations', organizations);
 app.use('/api/users', users);
 app.use('/api/login', login);
+app.use('/api/fields', fields);
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

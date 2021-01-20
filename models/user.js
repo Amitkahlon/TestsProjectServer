@@ -30,8 +30,8 @@ const validateUser = (user) => {
     return schema.validate(user)
 }
 
-userSchema.methods.generateAuthToken = function (org) {
-    return jwt.sign({_id: this._id, email: this.email, organization: org}, process.env.JWT_SECRET);
+userSchema.methods.generateAuthToken = function (org, field) {
+    return jwt.sign({_id: this._id, email: this.email, organization: org, field}, process.env.JWT_SECRET);
 }
 
 const User = mongoose.model('User', userSchema)
