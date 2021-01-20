@@ -1,8 +1,9 @@
 const express = require('express');
 const { Test, validateTest } = require('../models/test')
 const router = express.Router();
+const auth = require('../middlewares/auth')
 
-router.get('/', async (req, res) => {
+router.get('/all', auth, async (req, res) => {
     try {
         const tests = await Test.find().populate('questions organization').sort({title: 1});
         if(!tests || tests.length === 0) return res.status(404).send({message: 'No tests found'})
@@ -12,7 +13,17 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/', auth, async (req, res) => {
+    try {
+        const foundTests = await Test.find({organization: req.user.organization}).populate('questions organization')
+        if(!foundTests || foundTests.length === 0) return res.send({message: 'No tests was found'}).status(404)
+        res.status(200).send(foundTests);
+    } catch (error) {
+        res.send({message: "No tests was found", error}).status(404)
+    }
+})
+
+router.get('/:id', auth, async (req, res) => {
     const {id} = req.params
     try {
         const test = await Test.findById(id).populate('questions organization')
