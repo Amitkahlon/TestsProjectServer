@@ -2,9 +2,11 @@ const mongoose = require('mongoose')
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 
+
 const questionSchema = new mongoose.Schema({
     questionType: {
-        type: Boolean,
+        type: String,
+        enum: ["SingleChoiceQuestion", "MultipleSelectionQuestion"],
         required: true
     },
     title:{
@@ -48,8 +50,9 @@ const questionSchema = new mongoose.Schema({
         ref: 'Organization',
         required: true
     },
-    isHorizontal: {
-        type: Boolean,
+    answersDisplay: {
+        type: String,
+        enum: ['horizontal', 'vertical'],
         required: true
     },
     tags: [{
@@ -64,13 +67,13 @@ const Question = mongoose.model('Question', questionSchema)
 
 const validateQuestion = (question) => {
     const schema = Joi.object({
-        questionType: Joi.bool().required().label('Question type'),
+        questionType: Joi.string().required().label('Question type'),
         title: Joi.string().min(3).max(50).required().label('Title'),
         subTitle: Joi.string().min(3).max(50).label('Sub title'),
         correctAnswers: Joi.array().min(1).required().items(Joi.string()).label('Correct answer(s)'),
         incorrectAnswers: Joi.array().min(1).required().items(Joi.string()).label('Incorrect answer(s)'),
         organization: Joi.objectId().required().label('Organization'),
-        isHorizontal: Joi.bool().required().label('Is horizontal display'),
+        answersDisplay: Joi.string().required().label('Answer Display'),
         tags: Joi.array().items(Joi.string()).min(2).max(15).label('Tags')
     })
     return schema.validate(question);
