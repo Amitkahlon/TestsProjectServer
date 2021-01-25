@@ -4,12 +4,14 @@ const router = express.Router();
 const auth = require('../middlewares/auth')
 
 //get questions
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try {
-        const questions = await Question.find();
-        res.status(200).send({ questions });
+        const field = req.header('x-field')
+        const questions = await Question.find({field})
+        if(!questions || questions.length === 0) return res.send({message: 'No questions was found'}).status(404)
+        res.status(200).send(questions);
     } catch (error) {
-        res.status(503).send({ message: "Problem with db", error })
+        res.send({message: "No questions was found", error}).status(404)
     }
 })
 
@@ -32,7 +34,8 @@ router.get('/:id', async (req, res) => {
 //add question
 router.post('/', auth, async (req, res) => {
     const { question } = req.body;
-    question.organization = req.user.organization;
+    if(!question) return res.send({message: 'Invalid request.'}).status(403)
+    question.field = req.header('x-field')
     const { error } = validateQuestion(question)
     if (error) {
         return res.send({ message: error.details[0].message, error }).status(400);
@@ -45,7 +48,7 @@ router.post('/', auth, async (req, res) => {
         incorrectAnswers: question.incorrectAnswers,
         answersDisplay: question.answersDisplay,
         tags: question.tags,
-        organization: question.organization
+        field: question.field
     })
     try {
         await newQuestion.save()
@@ -60,6 +63,8 @@ router.post('/', auth, async (req, res) => {
 //update question
 router.put('/:id', async (req, res) => {
     const { question } = req.body;
+    if(!question) return res.send({message: 'Invalid request.'}).status(403)
+    question.field = req.header('x-field')
     const { id } = req.params
     if (question) {
         //todo: to enable edit validation we need to figure the organiztion stuff..
@@ -77,7 +82,8 @@ router.put('/:id', async (req, res) => {
                     correctAnswers: question.correctAnswers,
                     incorrectAnswers: question.incorrectAnswers,
                     answersDisplay: question.answersDisplay,
-                    tags: question.tags
+                    tags: question.tags,
+                    field: question.field
                 }
             }, { new: true, useFindAndModify: false });
 

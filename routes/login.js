@@ -15,15 +15,8 @@ router.post('/', async (req, res) => {
     try {
         const validatePass = await bcrypt.compare(user.password, foundUser.password);
         if (!validatePass) return res.send({ message: 'Invalid email or password.' }).status(400)
-        if (user.organization) {
-            const token = foundUser.generateAuthToken(user.organization);
-            res.status(200).send({ token: token });
-        }else if(user.logged && !user.organization){
-            return res.send({message: 'Please choose organization'}).status(400)
-        }
-        else{
-            res.status(200).send({user: _.pick(foundUser, ['_id', 'email', 'organizations'])})
-        }
+        const token = foundUser.generateAuthToken();
+        res.status(200).send({ user: _.pick(foundUser, ['_id', 'email', 'organizations']), token })
     } catch (ex) {
         res.send({ message: 'Invalid email or password.' }).status(400);
     }

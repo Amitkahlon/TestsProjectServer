@@ -45,9 +45,9 @@ const questionSchema = new mongoose.Schema({
             message: "An incorrect answers should have at least 1 answer."
         }
     },
-    organization:{
+    field:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Organization',
+        ref: 'Field',
         required: true
     },
     answersDisplay: {
@@ -72,7 +72,7 @@ const validateQuestion = (question) => {
         subTitle: Joi.string().min(3).max(50).label('Sub title'),
         correctAnswers: Joi.array().min(1).required().items(Joi.string()).label('Correct answer(s)'),
         incorrectAnswers: Joi.array().min(1).required().items(Joi.string()).label('Incorrect answer(s)'),
-        organization: Joi.objectId().required().label('Organization'),
+        field: Joi.objectId().required().label('Field'),
         answersDisplay: Joi.string().required().label('Answer Display'),
         tags: Joi.array().items(Joi.string()).min(2).max(40).label('Tags')
     })
