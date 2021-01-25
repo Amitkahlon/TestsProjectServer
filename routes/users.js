@@ -7,11 +7,15 @@ const auth = require('../middlewares/auth');
 const { Organization } = require('../models/organization');
 
 router.get('/me', auth, async (req, res) => {
-    const {organization} = req.user
+    let {organization} = req.headers
+    if(!organization)
+        organization = req.user.organization
     try{
-        const foundOrg = await Organization.findById(organization)
-        const admin = {user: req.user, organization: foundOrg}
-        res.send({admin}).status(200)
+        const org = await Organization.findById(organization).populate('fields')
+        const user = await User.findById(req.user._id)
+        let token = user.generateAuthToken(organization)
+        const admin = {user: req.user, organization: org}
+        res.send({admin, token}).status(200)
     }catch(err)
     {
         res.send({message: 'No admin found.'}).send(404)
@@ -30,6 +34,7 @@ router.get('/:id', auth, async (req, res) =>{
 
 router.post('/', async (req, res) =>{
     const {user} = req.body
+    if(!user) return res.send({message: 'Invalid request'}).status(403)
     const {error} = validateUser(user)
     if(error) return res.status(400).send(error.details[0].message);
     let newUser = await User.findOne({email: user.email})

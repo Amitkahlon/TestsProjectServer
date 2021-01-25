@@ -27,11 +27,13 @@ const validateUser = (user) => {
         password: Joi.string().min(6).max(14).required().label('Password'),
         organizations: Joi.array().items(Joi.objectId()).required().label('Organization(s)')
     })
-    return schema.validate(user)
+    return schema.validate(user, {
+        abortEarly: false
+    })
 }
 
-userSchema.methods.generateAuthToken = function (org, field) {
-    return jwt.sign({_id: this._id, email: this.email, organization: org, field}, process.env.JWT_SECRET);
+userSchema.methods.generateAuthToken = function (org) {
+    return jwt.sign({_id: this._id, email: this.email, organization: org}, process.env.JWT_SECRET);
 }
 
 const User = mongoose.model('User', userSchema)

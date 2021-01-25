@@ -3,19 +3,10 @@ const { Test, validateTest } = require('../models/test')
 const router = express.Router();
 const auth = require('../middlewares/auth')
 
-router.get('/all', auth, async (req, res) => {
-    try {
-        const tests = await Test.find().populate('questions organization').sort({title: 1});
-        if(!tests || tests.length === 0) return res.status(404).send({message: 'No tests found'})
-        res.status(200).send(tests);
-    } catch (error) {
-        res.status(404).send({message: "No tests was found", error})
-    }
-})
-
 router.get('/', auth, async (req, res) => {
     try {
-        const foundTests = await Test.find({organization: req.user.organization}).populate('questions organization')
+        const field = req.header('x-field')
+        const foundTests = await Test.find({field}).populate('questions field')
         if(!foundTests || foundTests.length === 0) return res.send({message: 'No tests was found'}).status(404)
         res.status(200).send(foundTests);
     } catch (error) {
@@ -23,20 +14,25 @@ router.get('/', auth, async (req, res) => {
     }
 })
 
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', async (req, res) => {
     const {id} = req.params
+    console.log(id);
     try {
-        const test = await Test.findById(id).populate('questions organization')
-        res.status(200).send(test);
+        const foundTest = await Test.findById(id).populate('questions field')
+        if(!foundTest) return res.send({message: 'No test was found'}).status(404)
+        res.status(200).send({test: foundTest});
     } catch (error) {
-        res.status(404).send({message: "No test was found", error})
+        res.send({message: "No test was found", error}).status(404)
     }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const {test} = req.body
+    if(!test) return res.send({message: 'Invalid request.'}).status(403)
+    test.field = req.header('x-field')
+    test.authorEmail = req.user.email
     const {error} = validateTest(test)
-    if(error) return res.status(400).send(error.details[0].message);
+    if(error) return res.send({error: error.details}).status(400);
     const newTest = new Test({
         title: test.title,
         description: test.description,
@@ -44,42 +40,44 @@ router.post('/', async (req, res) => {
         passGrade: test.passGrade,
         showCorrectAnswers: test.showCorrectAnswers,
         questions: test.questions,
-        organization: test.organization
+        field: test.field
     });
     try {
         await newTest.save();
         res.status(200).send({test: newTest});
     } catch (error) {
-        res.status(400).send(error);
+        res.send(error).status(400);
     }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     const {id} = req.params
     const {test} = req.body
+    if(!test) return res.send({message: 'Invalid request.'}).status(403)
+    test.field = req.header('x-field')
+    test.authorEmail = req.user.email
     const {error} = validateTest(test)
-    if(error) return res.status(400).send(error.details[0].message);
+    if(error) return res.send({error: error.details}).status(400);
     const updatedTest = await Test.findByIdAndUpdate(id, {
         $set:{
             title: test.title,
             description: test.description,
-            authorEmail: test.authorEmail,
             passGrade: test.passGrade,
             showCorrectAnswers: test.showCorrectAnswers,
             questions: test.questions,
-            organization: test.organization
+            field: test.field
         }
     }, {new:true, useFindAndModify: false})
     if(!updatedTest) return res.status(404).send({message: "Test not found."})
     res.status(200).send({test: updatedTest});
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     const {id} = req.params
     try {
         const deletedTest = await Test.findByIdAndRemove(id, { useFindAndModify: false })
         if(!deletedTest) return res.status(404).send({ message: "Test not found" });
-        res.status(200).send(deletedTest)
+        res.status(200).send({test: deletedTest})
     } catch (error) {
         res.status(404).send({ message: `Test with id ${id} not removed`, error })
     }

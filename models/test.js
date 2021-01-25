@@ -31,17 +31,11 @@ const testSchema = new mongoose.Schema({
     questions: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Question',
-        required: true,
-        validate: {
-            validator: function (qs) {
-                return qs && qs.length > 0;
-            },
-            message: "A test should have at least 1 question"
-        }
+        required: true
     }],
-    organization: {
+    field: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Organization',
+        ref: 'Field',
         required: true
     }
 });
@@ -54,9 +48,11 @@ const validateTest = (test) =>{
         passGrade: Joi.number().min(0).max(100).required().label('Pass grade'),
         showCorrectAnswers: Joi.bool().required().label('Show correct answers'),
         questions: Joi.array().items(Joi.objectId()).min(1).required().label('Questions'),
-        organization: Joi.objectId().required().label('Organization')
+        field: Joi.objectId().required().label('Field')
     })
-    return schema.validate(test);
+    return schema.validate(test, {
+        abortEarly: false
+    });
 }
 
 const Test = mongoose.model('Test', testSchema)

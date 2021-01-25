@@ -1,13 +1,14 @@
 const express = require('express');
 const auth = require('../middlewares/auth');
 const router = express.Router();
-const { Organization, validateOrganization } = require('../models/organization')
+const { Organization, validateOrganization } = require('../models/organization');
+const { User } = require('../models/user');
 
-router.get('/all', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try{
-        const orgs = await Organization.find().sort({name: 1})
-        if(!orgs || orgs.length === 0) return res.status(404).send({message: 'No organizations found'})
-        res.status(200).send(tests);
+        const user = await User.findById(req.user._id).populate('organizations')
+        if(!user || user.organizations === 0) return res.status(404).send({message: 'No organizations found'})
+        res.status(200).send(user.organizations);
     }catch(err)
     {
         res.send(400).send(err)
