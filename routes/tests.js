@@ -16,12 +16,26 @@ router.get('/', auth, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     const {id} = req.params
-    console.log(id);
     try {
-        const foundTest = await Test.findById(id).populate('questions field')
+        const foundTest = await Test.findById(id).select('-questions').populate('questions field')
         if(!foundTest) return res.send({message: 'No test was found'}).status(404)
-        res.status(200).send({test: foundTest});
+        const questionsTest = await Test.findById(id).populate('questions')
+        let questions = []
+        questionsTest.questions.forEach(q => {
+            let ans = q.correctAnswers.concat(q.incorrectAnswers)
+            questions.push({
+                answers: ans,
+                tags: q.tags,
+                _id: q._id,
+                questionType: q.questionType,
+                title: q.title,
+                answersDisplay: q.answersDisplay,
+                field: q.field
+            })
+        })
+        res.status(200).send({test: {...foundTest._doc, questions}});
     } catch (error) {
+        console.log(error);
         res.send({message: "No test was found", error}).status(404)
     }
 })
