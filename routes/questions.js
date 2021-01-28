@@ -9,7 +9,7 @@ router.get('/', auth, async (req, res) => {
         const field = req.header('x-field')
         const questions = await Question.find({field})
         if(!questions || questions.length === 0) return res.send({message: 'No questions was found'}).status(404)
-        res.status(200).send(questions);
+        res.status(200).send({questions: questions});
     } catch (error) {
         res.send({message: "No questions was found", error}).status(404)
     }
