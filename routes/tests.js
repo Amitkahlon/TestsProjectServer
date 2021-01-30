@@ -30,7 +30,8 @@ router.get('/:id', async (req, res) => {
                 questionType: q.questionType,
                 title: q.title,
                 answersDisplay: q.answersDisplay,
-                field: q.field
+                field: q.field,
+                subTitle: q.subTitle
             })
         })
         res.status(200).send({test: {...foundTest._doc, questions}});
