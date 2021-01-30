@@ -20,7 +20,26 @@ router.get('/:id', async (req, res) => {
     try {
         const foundTest = await Test.findById(id).populate('questions field')
         if(!foundTest) return res.send({message: 'No test was found'}).status(404)
+<<<<<<< Updated upstream
         res.status(200).send({test: foundTest});
+=======
+        const questionsTest = await Test.findById(id).populate('questions')
+        let questions = []
+        questionsTest.questions.forEach(q => {
+            let ans = q.correctAnswers.concat(q.incorrectAnswers)
+            questions.push({
+                answers: ans,
+                tags: q.tags,
+                _id: q._id,
+                questionType: q.questionType,
+                title: q.title,
+                answersDisplay: q.answersDisplay,
+                field: q.field,
+                subTitle: q.subTitle
+            })
+        })
+        res.status(200).send({test: {...foundTest._doc, questions}});
+>>>>>>> Stashed changes
     } catch (error) {
         res.send({message: "No test was found", error}).status(404)
     }
