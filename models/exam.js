@@ -33,6 +33,10 @@ const examSchema = new mongoose.Schema({
         ref: 'Test',
         required: true
     },
+    grade:{
+        type: Number,
+        default: -1,
+    },
     questions: {
         type: Array
     }
