@@ -9,7 +9,7 @@ const users = require('./routes/users')
 const login = require('./routes/login')
 const fields = require('./routes/fields')
 const exams = require('./routes/exams')
-
+const reports = require('./routes/reports')
 const cors = require('cors')
 const corsOptions = require('./options/corsOptions')
 
@@ -30,5 +30,6 @@ app.use('/api/users', users);
 app.use('/api/login', login);
 app.use('/api/fields', fields);
 app.use('/api/exams', exams);
+app.use('/api/reports', reports);
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
