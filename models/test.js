@@ -37,6 +37,20 @@ const testSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Field',
         required: true
+    },
+    passMessage:{
+        type: String,
+        required: true,
+        minlength: 5,
+    },
+    failMessage:{
+        type: String,
+        required: true,
+        minlength: 5,
+    },
+    modifiedAt: {
+        type: Date,
+        default: Date.now()
     }
 });
 
@@ -48,7 +62,9 @@ const validateTest = (test) =>{
         passGrade: Joi.number().min(0).max(100).required().label('Pass grade'),
         showCorrectAnswers: Joi.bool().required().label('Show correct answers'),
         questions: Joi.array().items(Joi.objectId()).min(1).required().label('Questions'),
-        field: Joi.objectId().required().label('Field')
+        field: Joi.objectId().required().label('Field'),
+        passMessage: Joi.string().min(5).required().label('Pass message'),
+        failMessage: Joi.string().min(5).required().label('Fail message'),
     })
     return schema.validate(test, {
         abortEarly: false
