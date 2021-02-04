@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const { Exam, validateExam } = require('../models/exam')
+const { Exam, validateExam } = require('../models/exam');
+const { answerIsCorrect } = require("../utilities/utilities");
 
 router.post('/', async (req, res) => {
     const { exam } = req.body
@@ -51,21 +52,52 @@ router.post('/:id/done', async (req, res, next) => {
     exam.questions.forEach(q => {
         foundExam.testId.questions.forEach(eq => {
             if (eq.title === q.question.title) {
-                if(answerIsCorrect(eq.correctAnswers, q.answer)){
+                if (answerIsCorrect(eq.correctAnswers, q.answer)) {
                     correctAnswers++;
                 }
-                if(foundExam.testId.showCorrectAnswers){
+                if (foundExam.testId.showCorrectAnswers) {
+
                     foundExam.questions[questionNumber].question.correctAnswer = eq.correctAnswers
                 }
             }
         })
         questionNumber++;
     })
-    foundExam.grade = Math.ceil(100 * (correctAnswers/foundExam.testId.questions.length))
-    if(!foundExam.testId.showCorrectAnswers)
+  
+    foundExam.grade = Math.ceil(100 * (correctAnswers / foundExam.testId.questions.length))
+    if (!foundExam.testId.showCorrectAnswers)
         foundExam.testId = foundExam.testId._id
     await foundExam.save()
-    return res.send({exam: foundExam})
+    return res.send({ exam: foundExam })
+})
+
+
+
+router.get('/students', async (req, res) => {
+    try {
+        const studentsNamesAndIds = await Exam.aggregate([
+            { $group: { _id: { studentId: "$studentId", studentFirstName: "$studentFirstName", studentLastName: "$studentLastName" } } }
+        ]);
+
+        return res.send({ students: studentsNamesAndIds });
+    } catch (error) {
+        return res.send({ message: error });
+    }
+})
+
+router.get('/student', async (req, res) => {
+    try {
+        const { studentFirstName, studentLastName, studentId } = req.query;
+        const studentsExams = await Exam.find({
+            studentFirstName,
+            studentLastName,
+            studentId
+        }).populate('testId');
+
+        return res.send({ exams: studentsExams });
+    } catch (error) {
+        return res.send({ message: error })
+    }
 })
 
 function answerIsCorrect(a, b) {
