@@ -56,12 +56,14 @@ router.post('/:id/done', async (req, res, next) => {
                     correctAnswers++;
                 }
                 if (foundExam.testId.showCorrectAnswers) {
+
                     foundExam.questions[questionNumber].question.correctAnswer = eq.correctAnswers
                 }
             }
         })
         questionNumber++;
     })
+  
     foundExam.grade = Math.ceil(100 * (correctAnswers / foundExam.testId.questions.length))
     if (!foundExam.testId.showCorrectAnswers)
         foundExam.testId = foundExam.testId._id
@@ -96,7 +98,18 @@ router.get('/student', async (req, res) => {
     } catch (error) {
         return res.send({ message: error })
     }
-
 })
+
+function answerIsCorrect(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+    a.sort()
+    b.sort()
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
 
 module.exports = router
