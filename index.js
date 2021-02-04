@@ -9,7 +9,10 @@ const users = require('./routes/users')
 const login = require('./routes/login')
 const fields = require('./routes/fields')
 const exams = require('./routes/exams')
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 const cors = require('cors')
 const corsOptions = require('./options/corsOptions')
 
