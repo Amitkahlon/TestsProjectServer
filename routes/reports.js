@@ -2,6 +2,9 @@ const express = require('express');
 const Joi = require('joi');
 const { Exam } = require('../models/exam');
 const { Test } = require('../models/test');
+const { Question } = require('../models/question');
+const { answerIsCorrect } = require("../utilities/utilities");
+const { generateQuestionDetails, generateSummary } = require("../utilities/examReportHelper");
 
 const router = express.Router();
 
@@ -26,7 +29,7 @@ router.get('/', async (req, res) => {
         });
 
         if (test) {
-            sendReport(test, exams, { fromDate, toDate}, res);
+            await sendTestReport(test, exams, { fromDate, toDate }, res);
         } else {
             res.send({ message: "test was not found" })
         }
@@ -51,7 +54,7 @@ router.get('/any', async (req, res) => {
         const exams = await Exam.find({ testId: testId });
 
         if (test) {
-            sendReport(test, exams, { fromDate: "any", toDate: "any" }, res);
+            await sendTestReport(test, exams, { fromDate: "any", toDate: "any" }, res);
         } else {
             res.send({ message: "test was not found" })
         }
@@ -63,10 +66,37 @@ router.get('/any', async (req, res) => {
     }
 })
 
-const sendReport = (test, exams, dates, res) => {
+router.get('/exam', async (req, res) => {
+    try {
+        const { examId } = req.query;
+        const exam = await Exam.findById(examId);
+        const test = await Test.findById(exam.testId).populate("questions");
+        
+        const report = await generateReport(exam, test);
+
+        res.send({ report });
+
+    } catch (error) {
+        res.send({ message: error});
+    }
+});
+
+const generateReport = async (exam, test) => {
+    const questionsDetails = await generateQuestionDetails(exam.questions);
+    const summary = await generateSummary(exam, test);
+
+    return { questionsDetails, summary, exam }
+}
+
+
+
+const sendTestReport = async (test, exams, dates, res) => {
     const passingCount = getPassedCount(exams.map(exam => exam.grade), test.passGrade);
     const averageGrade = getAveregeGrade(exams.map(exam => exam.grade));
-    const medianGrade = getMedian(exams.map(exam => exam.grade))
+    const medianGrade = getMedian(exams.map(exam => exam.grade));
+
+    const questions = await getQuestions(test.questions);
+    const questionStatistics = getQuestionsStatistics(questions, exams);
 
     const summary = {
         testName: test.title,
@@ -82,7 +112,79 @@ const sendReport = (test, exams, dates, res) => {
         medianGrade,
     }
 
-    res.send({ exams: exams, summary });
+    res.send({ report: { exams, summary, questionStatistics } });
+}
+
+const getQuestionsStatistics = (testQuestions, exams) => {
+
+    const testQuestionsStatistics = [];
+
+    testQuestions.forEach(question => {
+        const correctAnswersStats = question.correctAnswers.map(answer => {
+            return { text: answer, answeredCount: 0 }
+        })
+        const incorrectAnswersStats = question.incorrectAnswers.map(answer => {
+            return { text: answer, answeredCount: 0 }
+        })
+
+        testQuestionsStatistics.push({
+            questionId: question._id,
+            questionTitle: question.title,
+            questionTags: question.tags,
+            numberOfSubmissions: 0,
+            answeredCorrectly: 0,
+            correctAnswers: correctAnswersStats,
+            incorrectAnswers: incorrectAnswersStats
+        });
+    });
+
+    exams.forEach(exam => {
+        exam.questions.forEach(examQuestion => {
+            const testQuest = testQuestionsStatistics.find(testQuest => testQuest.questionId == examQuestion.question.questionId);
+
+            //if answered
+            if (examQuestion.answer.length > 0) { //if true, answered
+                testQuest.numberOfSubmissions++;
+
+                //if answered correctly
+                if (answerIsCorrect(examQuestion.answer, testQuest.correctAnswers.map(ans => ans.text))) {
+                    testQuest.answeredCorrectly++;
+                }
+
+                //add to answer counter
+                examQuestion.answer.forEach(answer => {
+
+                    testQuest.correctAnswers.every((corrAnswer) => {
+                        if (corrAnswer.text === answer) {
+                            corrAnswer.answeredCount++;
+                            return false;
+                        }
+                        else {
+                            return true
+                        }
+                    });
+
+                    testQuest.incorrectAnswers.every((incorrAnswer) => {
+                        if (incorrAnswer.text === answer) {
+                            incorrAnswer.answeredCount++;
+                            return false;
+                        }
+                        else {
+                            return true
+                        }
+                    });
+
+                });
+            }
+
+        })
+    });
+
+    return testQuestionsStatistics;
+}
+
+const getQuestions = async (questionsIds) => {
+    return await Question.find().where('_id').in(questionsIds).exec();
 }
 
 const getPassedCount = (examsGrades, passingGrade) => {
