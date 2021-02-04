@@ -39,6 +39,11 @@ const examSchema = new mongoose.Schema({
     },
     questions: {
         type: Array
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now(),
+        required: true
     }
 })
 
@@ -52,7 +57,7 @@ const validateExam = (exam) =>{
         studentLastName: Joi.string().min(2).required().label('Last name'),
         class: Joi.string().min(2).required().label('Class'),
         testId: Joi.objectId().required().label('Test ID'),
-        questions: Joi.array().min(1).required().label('Questions')
+        questions: Joi.array().min(1).required().label('Questions'),
     })
     return schema.validate(exam, {
         abortEarly: false

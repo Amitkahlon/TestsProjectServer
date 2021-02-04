@@ -14,6 +14,19 @@ router.get('/', auth, async (req, res) => {
     }
 })
 
+router.get('/namesAndIds', auth, async (req, res) => {
+    try {
+        const field = req.header('x-field')
+        const foundTests = await Test.find({field}).populate('questions field')
+        if(!foundTests || foundTests.length === 0) return res.send({message: 'No tests was found'}).status(404)
+        res.status(200).send({tests: foundTests.map(test => {
+            return {_id: test._id, title: test.title}
+        })  });
+    } catch (error) {
+        res.send({message: "No tests was found", error}).status(404)
+    }
+})
+
 router.get('/:id', async (req, res) => {
 <<<<<<< Updated upstream
     const {id} = req.params
