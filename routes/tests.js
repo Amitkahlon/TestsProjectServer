@@ -28,18 +28,10 @@ router.get('/namesAndIds', auth, async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-<<<<<<< Updated upstream
     const {id} = req.params
     try {
         const foundTest = await Test.findById(id).select('-questions').populate('questions field')
         if(!foundTest) return res.send({message: 'No test was found'}).status(404)
-=======
-    const { id } = req.params
-    console.log(id);
-    try {
-        const foundTest = await Test.findById(id).populate('questions field')
-        if (!foundTest) return res.send({ message: 'No test was found' }).status(404)
->>>>>>> Stashed changes
         const questionsTest = await Test.findById(id).populate('questions')
         let questions = []
         questionsTest.questions.forEach(q => {
@@ -57,12 +49,8 @@ router.get('/:id', async (req, res) => {
         })
         res.status(200).send({ test: { ...foundTest._doc, questions } });
     } catch (error) {
-<<<<<<< Updated upstream
         console.log(error);
         res.send({message: "No test was found", error}).status(404)
-=======
-        res.send({ message: "No test was found", error }).status(404)
->>>>>>> Stashed changes
     }
 })
 
