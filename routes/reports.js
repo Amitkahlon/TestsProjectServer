@@ -1,9 +1,5 @@
 const express = require('express');
-const Joi = require('joi');
-const { Exam } = require('../models/exam');
-const { Test } = require('../models/test');
-const { Question } = require('../models/question');
-const { getReportByDate, generateReport, getReportAny } = require("../bl/reportsService");
+const { getReportByDate, generateExamReport, getReportAny, reportFormValidtion, reportFormValidtionAnyDate} = require("../bl/reportsService");
 const auth = require('../middlewares/auth');
 const router = express.Router();
 
@@ -30,7 +26,7 @@ router.get('/', auth, async (req, res) => {
     }
 })
 
-router.get('/any', async (req, res) => {
+router.get('/any', auth, async (req, res) => {
     try {
         const testId = req.query.testId;
         const { error } = reportFormValidtionAnyDate(testId);
@@ -40,8 +36,8 @@ router.get('/any', async (req, res) => {
             return res.send({ message: error })
         };
 
-        const report = getReportAny(testId);
-        
+        const report = await getReportAny(testId);
+
         if (report.message) {
             return res.send({ message });
         } else {
@@ -55,11 +51,14 @@ router.get('/any', async (req, res) => {
     }
 })
 
-router.get('/exam', async (req, res) => {
+router.get('/exam', auth, async (req, res) => {
     try {
         const { examId } = req.query;
+        if (!examId) {
+            return res.send({ message: "examId cannot be empty" })
+        }
 
-        const report = await generateReport(examId);
+        const report = await generateExamReport(examId);
 
         res.send({ report });
 
@@ -68,27 +67,5 @@ router.get('/exam', async (req, res) => {
     }
 });
 
-
-
-
-
-const reportFormValidtion = (form) => {
-    const schema = Joi.object({
-        fromDate: Joi.date().iso().label('From Date'),
-        toDate: Joi.date().iso().label('To Date'),
-        testId: Joi.string().min(9).required().label('Test Id'),
-    })
-    return schema.validate(form, {
-        abortEarly: false
-    })
-}
-
-const reportFormValidtionAnyDate = (testId) => {
-    const schema = Joi.string().min(5).required().label('Test Id')
-
-    return schema.validate(testId, {
-        abortEarly: false
-    })
-}
 
 module.exports = router

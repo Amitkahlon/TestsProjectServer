@@ -1,15 +1,13 @@
-const { func } = require('joi');
+const Joi = require('joi');
 const { Question } = require('../models/question');
 const { Test } = require('../models/test');
 const { Exam } = require('../models/exam');
 const { answerIsCorrect } = require("../utilities/utilities");
 
 
-
-
-async function getReportAny(testId,) {
+async function getReportAny(testId) {
     const test = await Test.findById(testId);
-    const exams = await Exam.find({ testId: testId });
+    const exams = await Exam.find({ testId });
 
     if (test) {
         return await generateTestReport(test, exams, { fromDate: "any", toDate: "any" });
@@ -18,7 +16,7 @@ async function getReportAny(testId,) {
     }
 }
 
-async function generateReport(examId) {
+async function generateExamReport(examId) {
     const exam = await Exam.findById(examId);
     const test = await Test.findById(exam.testId).populate("questions");
 
@@ -231,8 +229,30 @@ const getQuestionsStatistics = (testQuestions, exams) => {
     return testQuestionsStatistics;
 }
 
+const reportFormValidtion = (form) => {
+    const schema = Joi.object({
+        fromDate: Joi.date().iso().label('From Date'),
+        toDate: Joi.date().iso().label('To Date'),
+        testId: Joi.string().min(9).required().label('Test Id'),
+    })
+    return schema.validate(form, {
+        abortEarly: false
+    })
+}
 
+const reportFormValidtionAnyDate = (testId) => {
+    const schema = Joi.string().min(5).required().label('Test Id')
+
+    return schema.validate(testId, {
+        abortEarly: false
+    })
+}
 
 module.exports.getReportByDate = getReportByDate;
 module.exports.getReportAny = getReportAny;
-module.exports.generateReport = generateReport;
+module.exports.generateExamReport = generateExamReport;
+module.exports.reportFormValidtion = reportFormValidtion;
+module.exports.reportFormValidtionAnyDate = reportFormValidtionAnyDate;
+
+
+
