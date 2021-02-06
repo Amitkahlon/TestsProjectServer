@@ -51,6 +51,11 @@ const testSchema = new mongoose.Schema({
     modifiedAt: {
         type: Date,
         default: Date.now()
+    },
+    language:{
+        type: String,
+        enum: ['he', 'en'],
+        required: true
     }
 });
 
@@ -65,6 +70,7 @@ const validateTest = (test) =>{
         field: Joi.objectId().required().label('Field'),
         passMessage: Joi.string().min(5).required().label('Pass message'),
         failMessage: Joi.string().min(5).required().label('Fail message'),
+        language: Joi.string().min(5).required().label('Language'),
     })
     return schema.validate(test, {
         abortEarly: false
