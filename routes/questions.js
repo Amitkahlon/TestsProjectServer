@@ -54,7 +54,7 @@ router.post('/', auth, async (req, res) => {
 
     const { error } = validateQuestion(question)
     if (error) {
-        return res.send({ message: error.details[0].message, error }).status(400);
+        return res.send({ message: error.details, error }).status(400);
     }
 
     const newQuestion = new Question({
@@ -65,15 +65,18 @@ router.post('/', auth, async (req, res) => {
         incorrectAnswers: question.incorrectAnswers,
         answersDisplay: question.answersDisplay,
         tags: question.tags,
-        field: question.field
+        field: question.field,
+        LastEdited: Date.now()
     })
 
+    console.log(newQuestion);
+
     try {
-        const res = await addQuestion(newQuestion);
-        return res.send(res);
+        const question = await addQuestion(newQuestion);
+        return res.send({ question });
     } catch (err) {
         console.log(error);
-        res.status(503).send({ message: "Problem occured when added to database", error });
+        res.send({ message: "Problem occured when added to database", error });
     }
 })
 
@@ -89,6 +92,7 @@ router.put('/:id', auth, async (req, res) => {
     }
 
     question.field = field;
+    question.LastEdited = Date.now();
     //todo: to enable edit validation we need to figure the organiztion stuff..
     // const { error } = validateQuestion(question)
     // if (error) {
