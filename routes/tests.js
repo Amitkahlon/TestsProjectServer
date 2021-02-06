@@ -2,6 +2,7 @@ const express = require('express');
 const { Test, validateTest } = require('../models/test')
 const router = express.Router();
 const auth = require('../middlewares/auth')
+const _ = require('lodash')
 
 router.get('/', auth, async (req, res) => {
     try {
@@ -36,6 +37,7 @@ router.get('/:id', async (req, res) => {
         let questions = []
         questionsTest.questions.forEach(q => {
             let ans = q.correctAnswers.concat(q.incorrectAnswers)
+            ans.sort();
             questions.push({
                 answers: ans,
                 tags: q.tags,
@@ -47,7 +49,7 @@ router.get('/:id', async (req, res) => {
                 subTitle: q.subTitle
             })
         })
-        res.status(200).send({ test: { ...foundTest._doc, questions } });
+        res.status(200).send({ test: { ...foundTest._doc, questions: _.shuffle(questions) } });
     } catch (error) {
         console.log(error);
         res.send({message: "No test was found", error}).status(404)

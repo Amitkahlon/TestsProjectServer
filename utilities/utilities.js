@@ -10,5 +10,4 @@ function answerIsCorrect(a, b) {
     return true;
 }
 
-
 module.exports.answerIsCorrect = answerIsCorrect;
