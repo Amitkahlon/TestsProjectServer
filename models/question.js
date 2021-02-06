@@ -60,7 +60,11 @@ const questionSchema = new mongoose.Schema({
         minlength: 2, 
         maxlength: 40,
         required: false
-    }]
+    }],
+    LastEdited:{
+        type: Date,
+        required: true
+    }
 })
 
 const Question = mongoose.model('Question', questionSchema)
