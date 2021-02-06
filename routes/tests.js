@@ -46,7 +46,7 @@ router.get('/:id', async (req, res) => {
                 title: q.title,
                 answersDisplay: q.answersDisplay,
                 field: q.field,
-                subTitle: q.subTitle
+                subTitle: q.subTitle,
             })
         })
         res.status(200).send({ test: { ...foundTest._doc, questions: _.shuffle(questions) } });
@@ -72,7 +72,8 @@ router.post('/', auth, async (req, res) => {
         questions: test.questions,
         field: test.field,
         passMessage: test.passMessage,
-        failMessage: test.failMessage
+        failMessage: test.failMessage,
+        language: test.language
     });
     try {
         await newTest.save();
@@ -100,6 +101,7 @@ router.put('/:id', auth, async (req, res) => {
             field: test.field,
             passMessage: test.passMessage,
             failMessage: test.failMessage,
+            language: test.language,
             modifiedAt: Date.now()
         }
     }, { new: true, useFindAndModify: false })
