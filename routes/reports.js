@@ -14,7 +14,6 @@ router.get('/', async (req, res) => {
         const { error } = reportFormValidtion({ testId, fromDate, toDate });
 
         if (error) {
-            console.error(error)
             return res.send({ message: error })
         };
 

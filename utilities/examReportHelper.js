@@ -1,8 +1,8 @@
-const { func } = require('joi');
 const { Question } = require('../models/question');
 const { answerIsCorrect } = require("./utilities");
 
 async function generateQuestionDetails(examQuestions) {
+    console.log(examQuestions);
     const questionsDetails = await Promise.all(examQuestions.map(async (examQuestion) => {
         const question = await Question.findById(examQuestion.question.questionId);
 

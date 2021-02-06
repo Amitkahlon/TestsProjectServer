@@ -36,6 +36,7 @@ router.get('/:id', async (req, res) => {
         let questions = []
         questionsTest.questions.forEach(q => {
             let ans = q.correctAnswers.concat(q.incorrectAnswers)
+            ans.sort();
             questions.push({
                 answers: ans,
                 tags: q.tags,
