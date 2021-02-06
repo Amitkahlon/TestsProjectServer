@@ -70,7 +70,7 @@ const validateTest = (test) =>{
         field: Joi.objectId().required().label('Field'),
         passMessage: Joi.string().min(5).required().label('Pass message'),
         failMessage: Joi.string().min(5).required().label('Fail message'),
-        language: Joi.string().min(5).required().label('Language'),
+        language: Joi.string().required().label('Language'),
     })
     return schema.validate(test, {
         abortEarly: false

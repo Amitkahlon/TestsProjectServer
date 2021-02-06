@@ -46,7 +46,7 @@ router.get('/:id', async (req, res) => {
                 title: q.title,
                 answersDisplay: q.answersDisplay,
                 field: q.field,
-                subTitle: q.subTitle
+                subTitle: q.subTitle,
             })
         })
         res.status(200).send({ test: { ...foundTest._doc, questions: _.shuffle(questions) } });
