@@ -95,12 +95,13 @@ router.put('/:id', auth, async (req, res) => {
     }
 
     question.field = field;
+    console.log(question);
+    const { error } = validateQuestion(question)
+    if (error) {
+        return res.send({ message: error.details, error }).status(400);
+    }
+
     question.LastEdited = Date.now();
-    //todo: to enable edit validation we need to figure the organiztion stuff..
-    // const { error } = validateQuestion(question)
-    // if (error) {
-    //     return res.send({ message: error.details[0].message, error }).status(400);
-    // }
 
     try {
         const dbQuestion = await editQuestion(id, question)
