@@ -17,7 +17,6 @@ const questionSchema = new mongoose.Schema({
     },
     subTitle: {
         type: String, 
-        minlength: 3, 
         maxlength: 50,
         required: false
     },
@@ -72,15 +71,15 @@ const Question = mongoose.model('Question', questionSchema)
 const validateQuestion = (question) => {
     const schema = Joi.object({
         questionType: Joi.string().required().label('Question type'),
-        title: Joi.string().min(3).max(50).required().label('Title'),
-        subTitle: Joi.string().min(3).max(50).label('Sub title'),
+        title: Joi.string().min(3).max(100).required().label('Title'),
+        subTitle: Joi.string().optional().allow('').max(50).label('Sub title'),
         correctAnswers: Joi.array().min(1).required().items(Joi.string()).label('Correct answer(s)'),
         incorrectAnswers: Joi.array().min(1).required().items(Joi.string()).label('Incorrect answer(s)'),
         field: Joi.objectId().required().label('Field'),
         answersDisplay: Joi.string().required().label('Answer Display'),
-        tags: Joi.array().items(Joi.string()).min(2).max(40).label('Tags')
+        tags: Joi.array().items(Joi.string()).min(0).max(40).label('Tags')
     })
-    return schema.validate(question);
+    return schema.validate(question, { abortEarly: false });
 }
 
 module.exports.Question = Question;

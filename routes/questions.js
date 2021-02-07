@@ -18,7 +18,7 @@ router.get('/', auth, async (req, res) => {
         if (!questions || questions.length === 0) return res.send({ message: 'No questions was found' }).status(404)
         return res.status(200).send({ questions });
     } catch (error) {
-        return res.send({ message: "No questions was found", error }).status(404)
+        return res.send({ message: { message: "No Question Found" }, error });
     }
 })
 
@@ -37,7 +37,7 @@ router.get('/:id', auth, async (req, res) => {
             return res.status(404).send({ message: "Question is not found" });
         }
     } catch (error) {
-        return res.status(400).send({ messege: "Value is invalid", error });
+        res.send({ message: { message: "Value is invalid" }, error });
     }
 })
 
@@ -52,8 +52,12 @@ router.post('/', auth, async (req, res) => {
 
     question.field = field;
 
+    console.log(question);
+
+
     const { error } = validateQuestion(question)
     if (error) {
+        console.log(error);
         return res.send({ message: error.details, error }).status(400);
     }
 
@@ -69,14 +73,13 @@ router.post('/', auth, async (req, res) => {
         LastEdited: Date.now()
     })
 
-    console.log(newQuestion);
 
     try {
         const question = await addQuestion(newQuestion);
         return res.send({ question });
     } catch (err) {
         console.log(error);
-        res.send({ message: "Problem occured when added to database", error });
+        res.send({ message: { message: "Problem occured when added to database" }, error });
     }
 })
 
