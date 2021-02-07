@@ -110,7 +110,7 @@ router.put('/:id', auth, async (req, res) => {
 
         res.status(200).send({ question: dbQuestion })
     } catch (error) {
-        res.status(404).send({ message: "Value is invalid", error })
+        res.send({ message: { message: "Value Is Invalid" }, error });
     }
 })
 
@@ -129,7 +129,7 @@ router.delete('/:id', auth, async (req, res) => {
 
         res.status(200).send({ question: deletedQuestion })
     } catch (error) {
-        res.status(503).send({ message: "Value is Invalid", error })
+        res.send({ message: { message: "Value Is Invalid" }, error });
     }
 })
 
