@@ -2,12 +2,13 @@ const express = require('express');
 const { Test, validateTest } = require('../models/test')
 const router = express.Router();
 const auth = require('../middlewares/auth')
-const _ = require('lodash')
+const _ = require('lodash');
+const { deleteTest, updateTest, getTests } = require('../bl/testsService');
 
 router.get('/', auth, async (req, res) => {
     try {
         const field = req.header('x-field')
-        const foundTests = await Test.find({ field }).populate('questions field')
+        const foundTests = await getTests(field)
         if (!foundTests || foundTests.length === 0) return res.send({ message: 'No tests was found' }).status(404)
         res.status(200).send(foundTests);
     } catch (error) {
@@ -18,7 +19,7 @@ router.get('/', auth, async (req, res) => {
 router.get('/namesAndIds', auth, async (req, res) => {
     try {
         const field = req.header('x-field')
-        const foundTests = await Test.find({field}).populate('questions field')
+        const foundTests = await getTests(field)
         if(!foundTests || foundTests.length === 0) return res.send({message: 'No tests was found'}).status(404)
         res.status(200).send({tests: foundTests.map(test => {
             return {_id: test._id, title: test.title}
@@ -91,20 +92,7 @@ router.put('/:id', auth, async (req, res) => {
     test.authorEmail = req.user.email
     const { error } = validateTest(test)
     if (error) return res.send({ error: error.details }).status(400);
-    const updatedTest = await Test.findByIdAndUpdate(id, {
-        $set: {
-            title: test.title,
-            description: test.description,
-            passGrade: test.passGrade,
-            showCorrectAnswers: test.showCorrectAnswers,
-            questions: test.questions,
-            field: test.field,
-            passMessage: test.passMessage,
-            failMessage: test.failMessage,
-            language: test.language,
-            modifiedAt: Date.now()
-        }
-    }, { new: true, useFindAndModify: false })
+    const updatedTest = await updateTest(id)
     if (!updatedTest) return res.status(404).send({ message: "Test not found." })
     res.status(200).send({ test: updatedTest });
 })
@@ -112,7 +100,7 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
     const { id } = req.params
     try {
-        const deletedTest = await Test.findByIdAndRemove(id, { useFindAndModify: false })
+        const deletedTest = await deleteTest(id)
         if (!deletedTest) return res.status(404).send({ message: "Test not found" });
         res.status(200).send({ test: deletedTest })
     } catch (error) {
