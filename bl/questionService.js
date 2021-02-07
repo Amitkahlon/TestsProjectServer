@@ -1,5 +1,4 @@
-const { func } = require('joi');
-const { Question, validateQuestion } = require('../models/question');
+const { Question } = require('../models/question');
 
 async function getQuestions(field) {
     const questions = await Question.find({ field })
