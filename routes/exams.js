@@ -1,4 +1,5 @@
-const express = require('express')
+const express = require('express');
+const { updateExamQuestion, getExamById, getStudentsByExam, getStudentExam } = require('../bl/examsService');
 const router = express.Router()
 const { Exam, validateExam } = require('../models/exam');
 const { answerIsCorrect } = require("../utilities/utilities");
@@ -29,11 +30,7 @@ router.post('/:id', async (req, res) => {
     const { question } = req.body
     const { id } = req.params
     if (!question) return res.send({ error: 'Invalid request' }).status(403)
-    const foundExam = await Exam.findOneAndUpdate({ _id: id, "questions.question.title": question.question.title }, {
-        $set: {
-            "questions.$.answer": question.answer
-        }
-    }, { useFindAndModify: false, new: true })
+    const foundExam = await updateExamQuestion(id, question.question.title, question.answer)
     if (!foundExam) return res.send({ error: 'No exam found' }).status(404)
     return res.send({ exam: foundExam })
 })
@@ -41,12 +38,7 @@ router.post('/:id', async (req, res) => {
 router.post('/:id/done', async (req, res, next) => {
     const { exam } = req.body;
     if (!exam) return res.send({ error: 'Invalid request' }).status(403)
-    const foundExam = await Exam.findById(exam._id).populate({
-        path: 'testId',
-        populate: {
-            path: 'questions',
-        }
-    })
+    const foundExam = await getExamById(exam._id);
     let correctAnswers = 0
     let questionNumber = 0
     exam.questions.forEach(q => {
@@ -75,11 +67,8 @@ router.post('/:id/done', async (req, res, next) => {
 
 router.get('/students', async (req, res) => {
     try {
-        const studentsNamesAndIds = await Exam.aggregate([
-            { $group: { _id: { studentId: "$studentId", studentFirstName: "$studentFirstName", studentLastName: "$studentLastName" } } }
-        ]);
-
-        return res.send({ students: studentsNamesAndIds });
+        const students = await getStudentsByExam();
+        return res.send({ students: students });
     } catch (error) {
         return res.send({ message: error });
     }
@@ -88,12 +77,7 @@ router.get('/students', async (req, res) => {
 router.get('/student', async (req, res) => {
     try {
         const { studentFirstName, studentLastName, studentId } = req.query;
-        const studentsExams = await Exam.find({
-            studentFirstName,
-            studentLastName,
-            studentId
-        }).populate('testId');
-
+        const studentsExams = await getStudentExam(studentFirstName, studentLastName, studentId);
         return res.send({ exams: studentsExams });
     } catch (error) {
         return res.send({ message: error })
